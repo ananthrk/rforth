@@ -94,9 +94,7 @@ class RForth
     end
 
     @dictionary.word(name) do
-      blocks.each do |b|
-        b.call
-      end
+      blocks.each {|b| b.call}
     end
   end
 
