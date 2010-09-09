@@ -29,11 +29,13 @@ class RForth
 
   def initial_dictionary
     d = Dictionary.new
-    d.word(':') { define_word }
-    d.word('.'){ @s_out.print( @stack.pop ) }
-    d.word('cr') { @s_out.puts }
-    d.word('+') { @stack << (@stack.pop + @stack.pop) }
-    d.word('*') { @stack << (@stack.pop * @stack.pop) }
+    d.word('dup')  { @stack << @stack.last }
+    d.word('drop') { @stack.pop }
+    d.word(':')    { define_word }
+    d.word('.')    { @s_out.print( "#{@stack.pop}\n" ) }
+    d.word('cr')   { @s_out.puts }
+    d.word('+')    { @stack << (@stack.pop + @stack.pop) }
+    d.word('*')    { @stack << (@stack.pop * @stack.pop) }
     d.word('-') do
       a = @stack.pop
       b = @stack.pop
@@ -113,7 +115,7 @@ class RForth
   end
 
   def is_space?( ch )
-    /\W/ =~ ch
+    /\W/ =~ ch.chr
   end
 
   def run
