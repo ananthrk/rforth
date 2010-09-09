@@ -29,18 +29,34 @@ class RForth
 
   def initial_dictionary
     d = Dictionary.new
-    d.word('dup')  { @stack << @stack.last }
-    d.word('drop') { @stack.pop }
+    
+    # stack management
+    d.word('dup')   { @stack << @stack.last }
+    d.word('?dup')  { @stack << @stack.last unless @stack.last == 0 }
+    d.word('drop')  { @stack.pop }
     d.word('swap') do
       a = @stack.pop
       b = @stack.pop
       @stack << a << b
     end
-    d.word(':')    { define_word }
-    d.word('.')    { @s_out.print( "#{@stack.last}\n" ) }
-    d.word('cr')   { @s_out.puts }
-    d.word('+')    { @stack << (@stack.pop + @stack.pop) }
-    d.word('*')    { @stack << (@stack.pop * @stack.pop) }
+    d.word('over') do
+      a = @stack.pop
+      b = @stack.pop
+      @stack << b << a << b
+    end
+    d.word('rot') do
+      a = @stack.pop
+      b = @stack.pop
+      c = @stack.pop
+      @stack << b << a << c
+    end
+
+    # quotations
+    d.word(':')     { define_word }
+
+    # math
+    d.word('+')     { @stack << (@stack.pop + @stack.pop) }
+    d.word('*')     { @stack << (@stack.pop * @stack.pop) }
     d.word('-') do
       a = @stack.pop
       b = @stack.pop
@@ -52,6 +68,13 @@ class RForth
       b = @stack.pop
       @stack << b / a
     end
+
+    # aux words
+    d.word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
+    d.word('.S')    { @s_out.print( "#{@stack}\n" ) }
+    d.word('cr')    { @s_out.puts }
+    d.word('bye')   { exit }
+
     d
   end
 
