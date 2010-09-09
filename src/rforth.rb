@@ -7,10 +7,12 @@ class Dictionary
 
   def word( name, &block )
     @entries[name] = { :name => name, :block => block, :immediate => false }
+    self
   end
 
   def immediate_word( name, &block )
     @entries[name] = { :name => name, :block => block, :immediate => true }
+    self
   end
 
   def []( name )
@@ -28,55 +30,40 @@ class RForth
   end
 
   def initial_dictionary
-    d = Dictionary.new
-    
-    # stack management
-    d.word('dup')   { @stack << @stack.last }
-    d.word('?dup')  { @stack << @stack.last unless @stack.last == 0 }
-    d.word('drop')  { @stack.pop }
-    d.word('swap') do
-      a = @stack.pop
-      b = @stack.pop
-      @stack << a << b
-    end
-    d.word('over') do
+    Dictionary.new
+    .word('dup')   { @stack << @stack.last }
+    .word('?dup')  { @stack << @stack.last unless @stack.last == 0 }
+    .word('drop')  { @stack.pop }
+    .word('swap')  { @stack += [@stack.pop, @stack.pop] }
+    .word('over') do
       a = @stack.pop
       b = @stack.pop
       @stack << b << a << b
     end
-    d.word('rot') do
+    .word('rot') do
       a = @stack.pop
       b = @stack.pop
       c = @stack.pop
       @stack << b << a << c
     end
-
-    # functions
-    d.word(':')     { define_word }
-
-    # math
-    d.word('+')     { @stack << (@stack.pop + @stack.pop) }
-    d.word('*')     { @stack << (@stack.pop * @stack.pop) }
-    d.word('-') do
+    .word(':')     { define_word }
+    .word('+')     { @stack << (@stack.pop + @stack.pop) }
+    .word('*')     { @stack << (@stack.pop * @stack.pop) }
+    .word('-') do
       a = @stack.pop
       b = @stack.pop
       @stack << b - a
     end
-
-    d.word('/') do
+    .word('/') do
       a = @stack.pop
       b = @stack.pop
       @stack << b / a
     end
-
-    # aux words
-    d.word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
-    d.word('.S')    { @s_out.print( "#{@stack}\n" ) }
-    d.word('.D')    { pp @dictionary }
-    d.word('cr')    { @s_out.puts }
-    d.word('bye')   { exit }
-
-    d
+    .word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
+    .word('.S')    { @s_out.print( "#{@stack}\n" ) }
+    .word('.D')    { pp @dictionary }
+    .word('cr')    { @s_out.puts }
+    .word('bye')   { exit }
   end
 
   def define_word
