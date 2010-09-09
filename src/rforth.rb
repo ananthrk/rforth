@@ -31,8 +31,13 @@ class RForth
     d = Dictionary.new
     d.word('dup')  { @stack << @stack.last }
     d.word('drop') { @stack.pop }
+    d.word('swap') do
+      a = @stack.pop
+      b = @stack.pop
+      @stack << a << b
+    end
     d.word(':')    { define_word }
-    d.word('.')    { @s_out.print( "#{@stack.pop}\n" ) }
+    d.word('.')    { @s_out.print( "#{@stack.last}\n" ) }
     d.word('cr')   { @s_out.puts }
     d.word('+')    { @stack << (@stack.pop + @stack.pop) }
     d.word('*')    { @stack << (@stack.pop * @stack.pop) }
