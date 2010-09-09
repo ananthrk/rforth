@@ -51,7 +51,7 @@ class RForth
       @stack << b << a << c
     end
 
-    # quotations
+    # functions
     d.word(':')     { define_word }
 
     # math
@@ -72,6 +72,7 @@ class RForth
     # aux words
     d.word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
     d.word('.S')    { @s_out.print( "#{@stack}\n" ) }
+    d.word('.D')    { pp @dictionary }
     d.word('cr')    { @s_out.puts }
     d.word('bye')   { exit }
 
@@ -83,7 +84,7 @@ class RForth
     blocks = []
     while (word = read_word)
       break if word == ';'
-      entry = @dictionary.word(word)
+      entry = @dictionary[word]
       raise "no such word: #{word}" unless entry
       if entry[:immediate]
         entry[:block].call
@@ -93,7 +94,9 @@ class RForth
     end
 
     @dictionary.word(name) do
-      blocks.each {|b| b.call}
+      blocks.each do |b|
+        b.call
+      end
     end
   end
 

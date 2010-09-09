@@ -11,3 +11,8 @@ A simple Forth interpreter in Ruby (1.9).
     .
     9
 
+    : sq dup * ;
+    
+    2 sq
+    .
+    4
