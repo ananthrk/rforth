@@ -1,8 +1,9 @@
 require 'pp'
 
 class Dictionary
-  def initialize
+  def initialize( &block )
     @entries = {}
+    block.call( self ) if block
   end
 
   def word( name, &block )
@@ -30,40 +31,41 @@ class RForth
   end
 
   def initial_dictionary
-    Dictionary.new
-    .word('dup')   { @stack << @stack.last }
-    .word('?dup')  { @stack << @stack.last unless @stack.last == 0 }
-    .word('drop')  { @stack.pop }
-    .word('swap')  { @stack += [@stack.pop, @stack.pop] }
-    .word('over') do
-      a = @stack.pop
-      b = @stack.pop
-      @stack << b << a << b
+    Dictionary.new do |d|
+      d.word('dup')   { @stack << @stack.last }
+      d.word('?dup')  { @stack << @stack.last unless @stack.last == 0 }
+      d.word('drop')  { @stack.pop }
+      d.word('swap')  { @stack += [@stack.pop, @stack.pop] }
+      d.word('over') do
+        a = @stack.pop
+        b = @stack.pop
+        @stack << b << a << b
+      end
+      d.word('rot') do
+        a = @stack.pop
+        b = @stack.pop
+        c = @stack.pop
+        @stack << b << a << c
+      end
+      d.word(':')     { define_word }
+      d.word('+')     { @stack << (@stack.pop + @stack.pop) }
+      d.word('*')     { @stack << (@stack.pop * @stack.pop) }
+      d.word('-') do
+        a = @stack.pop
+        b = @stack.pop
+        @stack << b - a
+      end
+      d.word('/') do
+        a = @stack.pop
+        b = @stack.pop
+        @stack << b / a
+      end
+      d.word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
+      d.word('.S')    { @s_out.print( "#{@stack}\n" ) }
+      d.word('.D')    { pp @dictionary }
+      d.word('cr')    { @s_out.puts }
+      d.word('bye')   { exit }
     end
-    .word('rot') do
-      a = @stack.pop
-      b = @stack.pop
-      c = @stack.pop
-      @stack << b << a << c
-    end
-    .word(':')     { define_word }
-    .word('+')     { @stack << (@stack.pop + @stack.pop) }
-    .word('*')     { @stack << (@stack.pop * @stack.pop) }
-    .word('-') do
-      a = @stack.pop
-      b = @stack.pop
-      @stack << b - a
-    end
-    .word('/') do
-      a = @stack.pop
-      b = @stack.pop
-      @stack << b / a
-    end
-    .word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
-    .word('.S')    { @s_out.print( "#{@stack}\n" ) }
-    .word('.D')    { pp @dictionary }
-    .word('cr')    { @s_out.puts }
-    .word('bye')   { exit }
   end
 
   def define_word
