@@ -60,7 +60,7 @@ class RForth
         b = @stack.pop
         @stack << b / a
       end
-      d.word('.')     { @s_out.print( "#{@stack.pop}\n" ) }
+      d.word('.')     { @s_out.print( @stack.pop ) }
       d.word('.S')    { @s_out.print( "#{@stack}\n" ) }
       d.word('.D')    { pp @dictionary }
       d.word('cr')    { @s_out.puts }
